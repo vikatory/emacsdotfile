@@ -372,18 +372,3 @@ layers configuration. You are free to put any user code."
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (zeal-at-point yaml-mode window-numbering web-mode web-beautify volatile-highlights vi-tilde-fringe tagedit swiper spray smooth-scrolling smeargle smartparens slim-mode shell-pop scss-mode sass-mode restclient ranger rainbow-mode rainbow-identifiers rainbow-delimiters racket-mode pyvenv python-environment pytest pyenv-mode pt prodigy powerline popwin pip-requirements pcre2el paradox pangu-spacing page-break-lines open-junk-file neotree multi-term move-text mmm-mode markdown-toc markdown-mode magit-gitflow magit-gh-pulls magit macrostep lua-mode linum-relative leuven-theme less-css-mode json-mode js2-refactor js2-mode js-doc jade-mode info+ indent-guide ido-vertical-mode ibuffer-projectile hy-mode hungry-delete highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gtags helm-gitignore helm-descbinds helm-dash helm-css-scss helm-c-yasnippet helm-ag haml-mode google-translate golden-ratio gitignore-mode github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-commit gist gh-md ggtags flycheck-pos-tip flycheck flx-ido find-by-pinyin-dired fill-column-indicator fancy-battery expand-region exec-path-from-shell evil-visualstar evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-matchit evil-jumper evil-indent-textobject evil-iedit-state evil-exchange evil-escape evil-args evil-anzu eshell-prompt-extras esh-help epc engine-mode emoji-cheat-sheet-plus emmet-mode elisp-slime-nav disaster dired-hacks-utils define-word cython-mode company-web company-tern company-statistics company-quickhelp company-emoji company-c-headers company-anaconda company coffee-mode cmake-mode clj-refactor clean-aindent-mode clang-format cider-eval-sexp-fu cider chinese-pyim buffer-move auto-yasnippet auto-highlight-symbol auto-dictionary anaconda-mode align-cljlet aggressive-indent adaptive-wrap ace-window ace-pinyin ace-link ac-ispell evil-leader evil which-key quelpa package-build use-package bind-key s dash spacemacs-theme))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
- '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
