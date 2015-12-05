@@ -20,8 +20,6 @@
 ;; List of packages to exclude.
 (setq hejia-excluded-packages '())
 
-(require 'tab-display)
-
 ;; For each package, define a function hejia/init-<package-name>
 ;;
 ;; (defun hejia/init-my-package ()
