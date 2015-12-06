@@ -81,12 +81,9 @@ values."
    ;; packages then consider to create a layer, you can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(
-                                      swiper
-                                      markdown-mode
                                       epc
                                       python-environment
                                       ;; jedi
-                                      helm-gtags
                                       flycheck
                                       dired-hacks-utils
                                       pt
@@ -290,6 +287,7 @@ user code here.  The exception is org related code, which should be placed in
   (loop for x downfrom 40 to 1 do
         (setq tab-stop-list (cons (* x 4) tab-stop-list)))
   (setq python-indent-offset 4)
+  (company-mode nil)
   )
 
 (defun dotspacemacs/user-config ()
