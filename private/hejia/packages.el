@@ -26,9 +26,13 @@
       evil-vimish-fold
       avy
       multiple-cursors
+      discover-my-major
 
 
-
+      (occur-mode :location built-in)
+      (dired-mode :location built-in)
+      hl-anything
+      wrap-region
 
 
       ;; elfeed
@@ -360,6 +364,164 @@ If `F.~REV~' already exists, use it instead of checking it out again."
       (define-key endless/mc-map "\C-a" #'mc/edit-beginnings-of-lines)
       (define-key endless/mc-map "\C-e" #'mc/edit-ends-of-lines)
       )))
+
+
+(defun hejia/init-occur-mode ()
+  (evilify occur-mode occur-mode-map
+           "RET" 'occur-mode-goto-occurrence))
+
+
+;; 探索buffer的major和minor模式的键绑定和命令描述
+(defun hejia/init-discover-my-major ()
+  (use-package discover-my-major
+    :defer t
+    :init
+    (progn
+      (evil-leader/set-key (kbd "mhm") 'discover-my-major)
+
+      (evilify makey-key-mode makey-key-mode-get-key-map))))
+
+
+(defun hejia/init-dired-mode ()
+  (use-package dired-mode
+    :init
+    (progn
+      (defun dired-get-size ()
+        (interactive)
+        (let ((files (dired-get-marked-files)))
+          (with-temp-buffer
+            (apply 'call-process "/usr/bin/du" nil t nil "-sch" files)
+            (message
+             "Size of all marked files: %s"
+             (progn
+               (re-search-backward "\\(^[ 0-9.,]+[A-Za-z]+\\).*total$")
+               (match-string 1))))))
+
+      (defun dired-start-process (cmd &optional file-list)
+        (interactive
+         (let ((files (dired-get-marked-files
+                       t current-prefix-arg)))
+           (list
+            (dired-read-shell-command "& on %s: "
+                                      current-prefix-arg files)
+            files)))
+        (let (list-switch)
+          (start-process
+           cmd nil shell-file-name
+           shell-command-switch
+           (format
+            "nohup 1>/dev/null 2>/dev/null %s \"%s\""
+            (if (and (> (length file-list) 1)
+                     (setq list-switch
+                           (cadr (assoc cmd dired-filelist-cmd))))
+                (format "%s %s" cmd list-switch)
+              cmd)
+            (mapconcat #'expand-file-name file-list "\" \"")))))
+
+      (defun dired-open-term ()
+        "Open an `ansi-term' that corresponds to current directory."
+        (interactive)
+        (let* ((current-dir (dired-current-directory))
+               (buffer (if (get-buffer "*zshell*")
+                           (switch-to-buffer "*zshell*")
+                         (ansi-term "/bin/zsh" "zshell")))
+               (proc (get-buffer-process buffer)))
+          (term-send-string
+           proc
+           (if (file-remote-p current-dir)
+               (let ((v (tramp-dissect-file-name current-dir t)))
+                 (format "ssh %s@%s\n"
+                         (aref v 1) (aref v 2)))
+             (format "cd '%s'\n" current-dir)))))
+
+      (defun dired-copy-file-here (file)
+        (interactive "fCopy file: ")
+        (copy-file file default-directory))
+
+      ;;dired find alternate file in other buffer
+      (defun my-dired-find-file ()
+        "Open buffer in another window"
+        (interactive)
+        (let ((filename (dired-get-filename nil t)))
+          (if (car (file-attributes filename))
+              (dired-find-alternate-file)
+            (dired-find-file-other-window))))
+
+      ;; do command on all marked file in dired mode
+      (defun hejia/dired-do-command (command)
+        "Run COMMAND on marked files. Any files not already open will be opened.
+After this command has been run, any buffers it's modified will remain
+open and unsaved."
+        (interactive "CRun on marked files M-x ")
+        (save-window-excursion
+          (mapc (lambda (filename)
+                  (find-file filename)
+                  (call-interactively command))
+                (dired-get-marked-files))))
+
+      (defun hejia/dired-up-directory()
+        "goto up directory and resue buffer"
+        (interactive)
+        (find-alternate-file ".."))
+
+      (spacemacs|evilify-map dired-mode-map
+        :mode dired-mode
+        :bindings
+        (kbd "C-k") 'hejia/dired-up-directory
+        "RET" 'dired-find-alternate-file
+        "E" 'dired-toggle-read-only
+        "C" 'dired-do-copy
+        "<mouse-2>" 'my-dired-find-file
+        "`" 'dired-open-term
+        "z" 'dired-get-size
+        "c" 'dired-copy-file-here)
+      )
+    :defer t
+    )
+  )
+
+
+
+;; spacemacs distribution disabled this package, because it has overlay bug.
+;; I hack the implementation here. on default, the hl-highlight-mode is disabled.
+(defun hejia/post-init-hl-anything ()
+  (use-package hl-anything
+    :init
+    (progn
+      (hl-highlight-mode -1)
+      (spacemacs|add-toggle toggle-hl-anything
+        :status hl-highlight-mode
+        :on (hl-highlight-mode)
+        :off (hl-highlight-mode -1)
+        :documentation "Toggle highlight anything mode."
+        :evil-leader "ths"))))
+
+
+;; 背景高亮一些标点内的内容(引号等)
+(defun hejia/init-wrap-region ()
+  (use-package wrap-region
+    :init
+    (progn
+      (wrap-region-global-mode t)
+      (wrap-region-add-wrappers
+       '(("$" "$")
+         ("{-" "-}" "#")
+         ("/" "/" nil ruby-mode)
+         ("/* " " */" "#" (java-mode javascript-mode css-mode js2-mode))
+         ("`" "`" nil (markdown-mode ruby-mode))))
+      (add-to-list 'wrap-region-except-modes 'dired-mode)
+      (add-to-list 'wrap-region-except-modes 'web-mode)
+      )
+    :defer t
+    :config
+    (spacemacs|hide-lighter wrap-region-mode)))
+
+
+
+
+
+
+
 
 
 
