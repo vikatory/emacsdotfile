@@ -40,6 +40,10 @@
       fcitx ;; no config
       company
       tagedit
+      deft
+      popwin
+      ace-window
+      helm
 
       visual-regexp
       visual-regexp-steroids
@@ -48,7 +52,11 @@
       (dired-mode :location built-in)
       hl-anything
       wrap-region
+      flycheck-package
+      flycheck
 
+      google-c-style
+      cc-mode
       lua-mode
       cmake-font-lock
       cmake-mode
@@ -65,6 +73,15 @@
       json-mode
       racket-mode
       js-comint
+      moz-controller
+
+      ox-reveal
+      org-tree-slide
+      org-bullets
+      ;; org-octopress
+      org-pomodoro
+      org-download
+      org
       ))
 
 ;; List of packages to exclude.
@@ -146,6 +163,10 @@
       (bind-key* "M-x" 'counsel-M-x)
       (evil-leader/set-key dotspacemacs-command-key 'counsel-M-x)
       )))
+
+
+(defun hejia/post-init-projectile ()
+  (evil-leader/set-key "pf" 'hejia/open-file-with-projectile-or-lsgit))
 
 
 (defun hejia/post-init-projectile ()
@@ -545,6 +566,30 @@ open and unsaved."
     (spacemacs|hide-lighter wrap-region-mode)))
 
 
+(defun hejia/init-flycheck-package ()
+  (use-package flycheck-package))
+
+
+(defun hejia/post-init-flycheck ()
+  (use-package flycheck
+    :defer t
+    :config (progn
+              (flycheck-package-setup)
+              ;; (setq flycheck-display-errors-function 'flycheck-display-error-messages)
+              (setq flycheck-display-errors-delay 0.2)
+              ;; (remove-hook 'c-mode-hook 'flycheck-mode)
+              ;; (remove-hook 'c++-mode-hook 'flycheck-mode)
+              ;; (evilify flycheck-error-list-mode flycheck-error-list-mode-map)
+              )))
+
+
+
+
+
+
+
+
+
 (defun hejia/post-init-helm-ag ()
   (setq helm-ag-use-agignore t)
   ;; This settings use .agignore file to ignore items, and it don't respect to .hgignore, .gitignore
@@ -673,6 +718,68 @@ open and unsaved."
   (add-hook 'web-mode-hook (lambda () (tagedit-mode 1))))
 
 
+(defun hejia/post-init-deft ()
+  (setq deft-use-filter-string-for-filename t)
+  (evil-leader/set-key-for-mode 'deft-mode "q" 'quit-window)
+  (setq deft-extension "org")
+  (setq deft-directory "~/org-notes"))
+
+
+(defun hejia/post-init-popwin ()
+  (progn
+    (push "*hejia/run-current-file output*" popwin:special-display-config)
+    (delete "*Async Shell Command*" 'popwin:special-display-config)
+    ))
+
+
+;; GNU Emacs package for selecting a window to switch to
+(defun hejia/post-init-ace-window ()
+  (use-package ace-window
+    :defer t
+    :init
+    (global-set-key (kbd "C-x C-o") #'ace-window)))
+
+
+(defun hejia/post-init-helm ()
+  (use-package helm
+    :init
+    (progn
+      (global-set-key (kbd "C-s-y") 'helm-show-kill-ring)
+      ;; See https://github.com/bbatsov/prelude/pull/670 for a detailed
+      ;; discussion of these options.
+      (setq helm-split-window-in-side-p t
+            helm-move-to-line-cycle-in-source t
+            helm-ff-search-library-in-sexp t
+            helm-ff-file-name-history-use-recentf t
+            helm-buffer-max-length 45)
+
+      (setq helm-completing-read-handlers-alist
+            '((describe-function . ido)
+              (describe-variable . ido)
+              (debug-on-entry . helm-completing-read-symbols)
+              (find-function . helm-completing-read-symbols)
+              (find-tag . helm-completing-read-with-cands-in-buffer)
+              (ffap-alternate-file . nil)
+              (tmm-menubar . nil)
+              (dired-do-copy . nil)
+              (dired-do-rename . nil)
+              (dired-create-directory . nil)
+              (find-file . ido)
+              (copy-file-and-rename-buffer . nil)
+              (rename-file-and-buffer . nil)
+              (w3m-goto-url . nil)
+              (ido-find-file . nil)
+              (ido-edit-input . nil)
+              (mml-attach-file . ido)
+              (read-file-name . nil)
+              (yas/compile-directory . ido)
+              (execute-extended-command . ido)
+              (minibuffer-completion-help . nil)
+              (minibuffer-complete . nil)
+              (c-set-offset . nil)
+              (wg-load . ido)
+              (rgrep . nil)
+              (read-directory-name . ido))))))
 
 
 
@@ -683,6 +790,21 @@ open and unsaved."
 
 
 
+
+
+
+
+
+
+
+(defun hejia/init-google-c-style ()
+  (use-package google-c-style
+    :init (add-hook 'c-mode-common-hook 'google-set-c-style)))
+
+;; (defun hejia/post-init-cc-mode ()
+;;   ;; company backend should be grouped
+;;   (define-key c++-mode-map (kbd "s-.") 'company-ycmd)
+;;   )
 
 
 (defun hejia/post-init-lua-mode ()
@@ -1041,9 +1163,418 @@ open and unsaved."
       (setq inferior-js-program-command "node"))))
 
 
+(defun hejia/init-moz-controller ()
+  (use-package moz-controller
+    :init
+    (moz-controller-global-mode t)
+    :diminish moz-controller-mode))
 
 
 
+
+
+
+
+
+
+;; Reveal.js is a tool for creating good-looking HTML presentations
+;; Org-Reveal exports your Org documents to reveal.js presentations
+(defun hejia/init-ox-reveal ()
+  (use-package ox-reveal
+    :defer t
+    :init
+    (progn
+      (setq org-reveal-root "~/code/emacsDev/plugin/reveal.js"))))
+
+
+(defun hejia/init-org-tree-slide ()
+  (use-package org-tree-slide
+    :init
+    (evil-leader/set-key "oto" 'org-tree-slide-mode)))
+
+
+(defun hejia/post-init-org-bullets ()
+  (setq org-bullets-bullet-list '("🐉" "🐠" "🐬" "🐤")))
+
+
+;; ;; Org-octopress is a package to help users those who want to write blog articles in org-style using Octopress (or Jekyll)
+;; (defun hejia/init-org-octopress ()
+;;   (use-package org-octopress
+;;     :init
+;;     (progn
+;;       (evilify org-octopress-summary-mode org-octopress-summary-mode-map)
+;;       (add-hook 'org-octopress-summary-mode-hook
+;;                 #'(lambda () (local-set-key (kbd "q") 'bury-buffer)))
+;;       (setq org-blog-dir "~/4gamers.cn/")
+;;       (setq org-octopress-directory-top org-blog-dir)
+;;       (setq org-octopress-directory-posts (concat org-blog-dir "source/_posts"))
+;;       (setq org-octopress-directory-org-top org-blog-dir)
+;;       (setq org-octopress-directory-org-posts (concat org-blog-dir "blog"))
+;;       (setq org-octopress-setup-file (concat org-blog-dir "setupfile.org"))
+
+;;       (defun hejia/org-save-and-export ()
+;;         (interactive)
+;;         (org-octopress-setup-publish-project)
+;;         (org-publish-project "octopress" t))
+
+;;       (evil-leader/set-key "op" 'hejia/org-save-and-export)
+;;       )))
+
+
+;; GTD
+(defun hejia/post-init-org-pomodoro ()
+  (use-package org-pomodoro
+    :init
+    (define-key org-agenda-mode-map (kbd "P") 'org-pomodoro)
+    :defer t
+    :config
+    (progn
+      (add-hook 'org-pomodoro-finished-hook '(lambda () (hejia/growl-notification "Pomodoro Finished" "☕️ Have a break!" t)))
+      (add-hook 'org-pomodoro-short-break-finished-hook '(lambda () (hejia/growl-notification "Short Break" "🐝 Ready to Go?" t)))
+      (add-hook 'org-pomodoro-long-break-finished-hook '(lambda () (hejia/growl-notification "Long Break" " 💪 Ready to Go?" t)))
+      )))
+
+
+(defun hejia/init-org-download ()
+  (use-package org-download
+    :defer t
+    :init
+    (org-download-enable)))
+
+
+(defun hejia/post-init-org ()
+  ;; define the refile targets
+  (setq org-agenda-files (quote ("~/mycode/org-notes" )))
+  (setq org-default-notes-file "~/mycode/org-notes/gtd.org")
+
+  ;; the %i would copy the selected text into the template
+  ;;http://www.howardism.org/Technical/Emacs/journaling-org.html
+  ;;add multi-file journal
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file+headline "~/mycode/org-notes/gtd.org" "Workspace")
+           "* TODO %?\n  %i\n"
+           :empty-lines 1)
+          ("n" "notes" entry (file+headline "~/mycode/org-notes/notes.org" "Quick notes")
+           "* TODO [#C] %?\n  %i\n %U"
+           :empty-lines 1)
+          ("b" "Blog Ideas" entry (file+headline "~/mycode/org-notes/notes.org" "Blog Ideas")
+           "* TODO %?\n  %i\n %U"
+           :empty-lines 1)
+          ("w" "work" entry (file+headline "~/mycode/org-notes/gtd.org" "Cocos2D-X")
+           "* TODO %?\n  %i\n %U"
+           :empty-lines 1)
+          ("c" "Chrome" entry (file+headline "~/mycode/org-notes/notes.org" "Quick notes")
+           "* TODO %?\n %(hejia/retrieve-chrome-current-tab-url)\n %i\n %U"
+           :empty-lines 1)
+          ("l" "links" entry (file+headline "~/mycode/org-notes/notes.org" "Quick notes")
+           "* TODO %?\n  %i\n %a \n %U"
+           :empty-lines 1)
+          ("j" "Journal Entry"
+           entry (file+datetree "~/mycode/org-notes/journal.org")
+           "* %?"
+           :empty-lines 1)))
+
+  ;;An entry without a cookie is treated just like priority ' B '.
+  ;;So when create new task, they are default 重要且紧急
+  (setq org-agenda-custom-commands
+        '(
+          ("w" . "任务安排")
+          ("wa" "重要且紧急的任务" tags-todo "+PRIORITY=\"A\"")
+          ("wb" "重要且不紧急的任务" tags-todo "-Weekly-Monthly-Daily+PRIORITY=\"B\"")
+          ("wc" "不重要且紧急的任务" tags-todo "+PRIORITY=\"C\"")
+          ("b" "Blog" tags-todo "BLOG")
+          ("p" . "项目安排")
+          ("pw" tags-todo "PROJECT+WORK+CATEGORY=\"cocos2d-x\"")
+          ("pl" tags-todo "PROJECT+DREAM+CATEGORY=\"hejia\"")
+          ("W" "Weekly Review"
+           ((stuck "")            ;; review stuck projects as designated by org-stuck-projects
+            (tags-todo "PROJECT") ;; review all projects (assuming you use todo keywords to designate projects)
+            ))))
+
+  (defvar hejia-website-html-preamble
+    "<div class='nav'>
+<ul>
+<li><a href='http://blog.com'>博客</a></li>
+<li><a href='/index.html'>Wiki目录</a></li>
+</ul>
+</div>")
+  (defvar hejia-website-html-blog-head
+    " <link rel='stylesheet' href='css/site.css' type='text/css'/> \n
+    <link rel=\"stylesheet\" type=\"text/css\" href=\"/css/worg.css\"/>")
+  (setq org-publish-project-alist
+        `(
+          ("blog-notes"
+           :base-directory "~/mycode/org-notes"
+           :base-extension "org"
+           :publishing-directory "~/mycode/org-notes/public_html/"
+
+           :recursive t
+           :html-head , hejia-website-html-blog-head
+           :publishing-function org-html-publish-to-html
+           :headline-levels 4           ; Just the default for this project.
+           :auto-preamble t
+           :exclude "gtd.org"
+           :exclude-tags ("ol" "noexport")
+           :section-numbers nil
+           :html-preamble ,hejia-website-html-preamble
+           :author "hejia"
+           :email "guanghui8827@gmail.com"
+           :auto-sitemap t               ; Generate sitemap.org automagically...
+           :sitemap-filename "index.org" ; ... call it sitemap.org (it's the default)...
+           :sitemap-title "我的wiki"     ; ... with title 'Sitemap'.
+           :sitemap-sort-files anti-chronologically
+           :sitemap-file-entry-format "%t" ; %d to output date, we don't need date here
+           )
+          ("blog-static"
+           :base-directory "~/mycode/org-notes"
+           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+           :publishing-directory "~/mycode/org-notes/public_html/"
+           :recursive t
+           :publishing-function org-publish-attachment
+           )
+          ("blog" :components ("blog-notes" "blog-static"))))
+
+  (defun org-summary-todo (n-done n-not-done)
+    "Switch entry to DONE when all subentries are done, to TODO otherwise."
+    (let (org-log-done org-log-states)  ; turn off logging
+      (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+
+  (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+  ;; used by org-clock-sum-today-by-tags
+  (defun filter-by-tags ()
+    (let ((head-tags (org-get-tags-at)))
+      (member current-tag head-tags)))
+
+  (defun org-clock-sum-today-by-tags (timerange &optional tstart tend noinsert)
+    (interactive "P")
+    (let* ((timerange-numeric-value (prefix-numeric-value timerange))
+           (files (org-add-archive-files (org-agenda-files)))
+           (include-tags '("WORK" "EMACS" "DREAM" "WRITING" "MEETING"
+                           "LIFE" "PROJECT" "OTHER"))
+           (tags-time-alist (mapcar (lambda (tag) `(,tag . 0)) include-tags))
+           (output-string "")
+           (tstart (or tstart
+                       (and timerange (equal timerange-numeric-value 4) (- (org-time-today) 86400))
+                       (and timerange (equal timerange-numeric-value 16) (org-read-date nil nil nil "Start Date/Time:"))
+                       (org-time-today)))
+           (tend (or tend
+                     (and timerange (equal timerange-numeric-value 16) (org-read-date nil nil nil "End Date/Time:"))
+                     (+ tstart 86400)))
+           h m file item prompt donesomething)
+      (while (setq file (pop files))
+        (setq org-agenda-buffer (if (file-exists-p file)
+                                    (org-get-agenda-file-buffer file)
+                                  (error "No such file %s" file)))
+        (with-current-buffer org-agenda-buffer
+          (dolist (current-tag include-tags)
+            (org-clock-sum tstart tend 'filter-by-tags)
+            (setcdr (assoc current-tag tags-time-alist)
+                    (+ org-clock-file-total-minutes (cdr (assoc current-tag tags-time-alist)))))))
+      (while (setq item (pop tags-time-alist))
+        (unless (equal (cdr item) 0)
+          (setq donesomething t)
+          (setq h (/ (cdr item) 60)
+                m (- (cdr item) (* 60 h)))
+          (setq output-string (concat output-string (format "[-%s-] %.2d:%.2d\n" (car item) h m)))))
+      (unless donesomething
+        (setq output-string (concat output-string "[-Nothing-] Done nothing!!!\n")))
+      (unless noinsert
+        (insert output-string))
+      output-string))
+
+  (eval-after-load 'org
+    '(progn
+       (global-set-key (kbd "C-c a") 'org-agenda)
+       (define-key org-mode-map (kbd "s-p") 'org-priority)
+       (define-key global-map (kbd "<f9>") 'org-capture)
+       (global-set-key (kbd "C-c b") 'org-iswitchb)
+       (define-key evil-normal-state-map (kbd "C-c C-w") 'org-refile)
+       (evil-leader/set-key-for-mode 'org-mode
+         "owh" 'plain-org-wiki-helm
+         "owf" 'plain-org-wiki)
+       ))
+
+  (setq org-mobile-directory "~/mycode/org-notes/org")
+  )
+
+
+;;In order to export pdf to support Chinese, I should install Latex at here: https://www.tug.org/mactex/
+;; http://freizl.github.io/posts/2012-04-06-export-orgmode-file-in-Chinese.html
+;;http://stackoverflow.com/questions/21005885/export-org-mode-code-block-and-result-with-different-styles
+(defun hejia/post-init-org ()
+  (progn
+    ;; https://github.com/syl20bnr/spacemacs/issues/2994#issuecomment-139737911
+    ;; (when (configuration-layer/package-usedp 'company)
+    ;;   (spacemacs|add-company-hook org-mode))
+    (spacemacs|disable-company org-mode)
+
+    (require 'org-compat)
+    (require 'org)
+    ;; (add-to-list 'org-modules "org-habit")
+    (add-to-list 'org-modules 'org-habit)
+    (require 'org-habit)
+
+    (setq org-refile-use-outline-path 'file)
+    (setq org-outline-path-complete-in-steps nil)
+    (setq org-refile-targets
+          '((nil :maxlevel . 4)
+            (org-agenda-files :maxlevel . 4)))
+    ;; config stuck project
+    (setq org-stuck-projects
+          '("TODO={.+}/-DONE" nil nil "SCHEDULED:\\|DEADLINE:"))
+
+    (setq org-agenda-inhibit-startup t)       ;; ~50x speedup
+    (setq org-agenda-use-tag-inheritance nil) ;; 3-4x speedup
+    (setq org-agenda-window-setup 'current-window)
+    (setq org-log-done t)
+
+    ;; 加密文章
+    ;; "http://coldnew.github.io/blog/2013/07/13_5b094.html"
+    ;; org-mode 設定
+    (require 'org-crypt)
+
+    ;; 當被加密的部份要存入硬碟時，自動加密回去
+    (org-crypt-use-before-save-magic)
+
+    ;; 設定要加密的 tag 標籤為 secret
+    (setq org-crypt-tag-matcher "secret")
+
+    ;; 避免 secret 這個 tag 被子項目繼承 造成重複加密
+    ;; (但是子項目還是會被加密喔)
+    (setq org-tags-exclude-from-inheritance (quote ("secret")))
+
+    ;; 用於加密的 GPG 金鑰
+    ;; 可以設定任何 ID 或是設成 nil 來使用對稱式加密 (symmetric encryption)
+    (setq org-crypt-key nil)
+
+    (add-to-list 'auto-mode-alist '("\\.org\\’" . org-mode))
+
+
+
+    (setq org-todo-keywords
+          (quote ((sequence "TODO(t)" "STARTED(s)" "|" "DONE(d!/!)")
+                  (sequence "WAITING(w@/!)" "SOMEDAY(S)"  "|" "CANCELLED(c@/!)" "MEETING(m)" "PHONE(p)"))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; Org clock
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    ;; Change task state to STARTED when clocking in
+    (setq org-clock-in-switch-to-state "STARTED")
+    ;; Save clock data and notes in the LOGBOOK drawer
+    (setq org-clock-into-drawer t)
+    ;; Removes clocked tasks with 0:00 duration
+    (setq org-clock-out-remove-zero-time-clocks t) ;; Show the clocked-in task - if any - in the header line
+
+    (setq org-tags-match-list-sublevels nil)
+
+    ;; http://wenshanren.org/?p=327
+    ;; change it to helm
+    (defun hejia/org-insert-src-block (src-code-type)
+      "Insert a `SRC-CODE-TYPE' type source code block in org-mode."
+      (interactive
+       (let ((src-code-types
+              '("emacs-lisp" "python" "C" "sh" "java" "js" "clojure" "C++" "css"
+                "calc" "asymptote" "dot" "gnuplot" "ledger" "lilypond" "mscgen"
+                "octave" "oz" "plantuml" "R" "sass" "screen" "sql" "awk" "ditaa"
+                "haskell" "latex" "lisp" "matlab" "ocaml" "org" "perl" "ruby"
+                "scheme" "sqlite")))
+         (list (ido-completing-read "Source code type: " src-code-types))))
+      (progn
+        (newline-and-indent)
+        (insert (format "#+BEGIN_SRC %s\n" src-code-type))
+        (newline-and-indent)
+        (insert "#+END_SRC\n")
+        (previous-line 2)
+        (org-edit-src-code)))
+
+    (add-hook 'org-mode-hook '(lambda ()
+                                ;; keybinding for editing source code blocks
+                                ;; keybinding for inserting code blocks
+                                (local-set-key (kbd "C-c i s")
+                                               'hejia/org-insert-src-block)
+                                ))
+    (require 'ox-publish)
+    (add-to-list 'org-latex-classes '("ctexart" "\\documentclass[11pt]{ctexart}
+                                        [NO-DEFAULT-PACKAGES]
+                                        \\usepackage[utf8]{inputenc}
+                                        \\usepackage[T1]{fontenc}
+                                        \\usepackage{fixltx2e}
+                                        \\usepackage{graphicx}
+                                        \\usepackage{longtable}
+                                        \\usepackage{float}
+                                        \\usepackage{wrapfig}
+                                        \\usepackage{rotating}
+                                        \\usepackage[normalem]{ulem}
+                                        \\usepackage{amsmath}
+                                        \\usepackage{textcomp}
+                                        \\usepackage{marvosym}
+                                        \\usepackage{wasysym}
+                                        \\usepackage{amssymb}
+                                        \\usepackage{booktabs}
+                                        \\usepackage[colorlinks,linkcolor=black,anchorcolor=black,citecolor=black]{hyperref}
+                                        \\tolerance=1000
+                                        \\usepackage{listings}
+                                        \\usepackage{xcolor}
+                                        \\lstset{
+                                        %行号
+                                        numbers=left,
+                                        %背景框
+                                        framexleftmargin=10mm,
+                                        frame=none,
+                                        %背景色
+                                        %backgroundcolor=\\color[rgb]{1,1,0.76},
+                                        backgroundcolor=\\color[RGB]{245,245,244},
+                                        %样式
+                                        keywordstyle=\\bf\\color{blue},
+                                        identifierstyle=\\bf,
+                                        numberstyle=\\color[RGB]{0,192,192},
+                                        commentstyle=\\it\\color[RGB]{0,96,96},
+                                        stringstyle=\\rmfamily\\slshape\\color[RGB]{128,0,0},
+                                        %显示空格
+                                        showstringspaces=false
+                                        }
+                                        "
+                                      ("\\section{%s}" . "\\section*{%s}")
+                                      ("\\subsection{%s}" . "\\subsection*{%s}")
+                                      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                                      ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                                      ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+
+    ;; {{ export org-mode in Chinese into PDF
+    ;; @see http://freizl.github.io/posts/tech/2012-04-06-export-orgmode-file-in-Chinese.html
+    ;; and you need install texlive-xetex on different platforms
+    ;; To install texlive-xetex:
+    ;;    `sudo USE="cjk" emerge texlive-xetex` on Gentoo Linux
+    ;; }}
+    (setq org-latex-default-class "ctexart")
+    (setq org-latex-pdf-process
+          '(
+            "xelatex -interaction nonstopmode -output-directory %o %f"
+            "xelatex -interaction nonstopmode -output-directory %o %f"
+            "xelatex -interaction nonstopmode -output-directory %o %f"
+            "rm -fr %b.out %b.log %b.tex auto"))
+
+    (setq org-latex-listings t)
+    ;; improve org babel
+
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '( (perl . t)
+        (ruby . t)
+        (sh . t)
+        (js . t)
+        (python . t)
+        (emacs-lisp . t)
+        (plantuml . t)
+        (C . t)
+        (R . t)
+        (ditaa . t)))
+
+    (setq org-plantuml-jar-path
+          (expand-file-name "~/.spacemacs.d/plantuml.jar"))
+    (setq org-ditaa-jar-path "~/.spacemacs.d/ditaa.jar")
+
+    ))
 
 
 

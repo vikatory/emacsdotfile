@@ -274,7 +274,7 @@ user code here.  The exception is org related code, which should be placed in
   (setq tramp-ssh-controlmaster-options "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")
 
   ;; ss proxy. But it will cause anacond-mode failed.
-  (setq socks-server '("Default server" "127.0.0.1" 1080 5))
+  ;; (setq socks-server '("Default server" "127.0.0.1" 1080 5))
   (setq evil-shift-round nil)
 
   )
@@ -287,7 +287,7 @@ user code here.  The exception is org related code, which should be placed in
   (loop for x downfrom 40 to 1 do
         (setq tab-stop-list (cons (* x 4) tab-stop-list)))
   (setq python-indent-offset 4)
-  (company-mode nil)
+  ;; (company-mode nil)
   )
 
 (defun dotspacemacs/user-config ()
@@ -315,8 +315,8 @@ layers configuration. You are free to put any user code."
 
   ;; Python设置
   (add-hook 'python-mode-hook 'my-python-mode-hook)
-  (add-hook 'python-mode-hook 'jedi:setup)
-  (setq jedi:complete-on-dot t)                 ; optional
+  ;; (add-hook 'python-mode-hook 'jedi:setup)
+  ;; (setq jedi:complete-on-dot t)                 ; optional
   (add-hook 'python-mode-hook #'flycheck-mode)
 
   ;; 滚动设置
@@ -366,7 +366,66 @@ layers configuration. You are free to put any user code."
 
   (setq menu-bar-mode nil)
 
+  ;; 移动整行
+  (defun move-region-around (direction beg end)
+    (let (real-beg
+          real-end
+          target-beg
+          deactivate-mark
+          text)
+
+      (save-excursion
+        (goto-char beg)
+        (setq real-beg (line-beginning-position))
+
+        (when (equal direction 'up)
+          (setq target-beg (line-beginning-position 0)))
+
+        (goto-char end)
+        (setq real-end (line-beginning-position 2))
+
+        (when (equal direction 'down)
+          (setq target-beg (copy-marker (line-beginning-position 3)))) ;must use marker
+
+        (setq text (buffer-substring-no-properties real-beg real-end))
+        (delete-region real-beg real-end)
+        (goto-char target-beg)
+        (insert text)
+        )
+
+      (set-mark (+ target-beg (- real-end real-beg 1)))
+      (goto-char target-beg)
+      (setq transient-mark-mode 'only)))
+
+
+  (defun move-region-up (beg end)
+    (interactive "r")
+    (move-region-around 'up beg end))
+
+  (defun move-region-down (beg end)
+    (interactive "r")
+    (move-region-around 'down beg end))
+
+  (global-set-key (quote [M-up]) (quote move-region-up))
+  (global-set-key (quote [M-down]) (quote move-region-down))
+
+
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (zeal-at-point yaml-mode wrap-region worf window-numbering web-mode web-beautify volatile-highlights vi-tilde-fringe tagedit spray smooth-scrolling smeargle smartparens slim-mode shell-pop scss-mode sass-mode restclient ranger rainbow-mode rainbow-identifiers rainbow-delimiters racket-mode pyvenv python-environment pytest pyenv-mode pt prodigy powerline popwin pip-requirements pcre2el paradox pangu-spacing page-break-lines ox-reveal org-tree-slide org-download open-junk-file nodejs-repl neotree mwe-log-commands multi-term moz-controller move-text mmm-mode markdown-toc markdown-mode magit-gitflow magit-gh-pulls magit macrostep lua-mode lispy linum-relative leuven-theme less-css-mode keyfreq json-mode js2-refactor js2-mode js-doc js-comint jade-mode info+ indent-guide impatient-mode ido-vertical-mode ibuffer-projectile hy-mode hungry-delete hl-anything highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-ls-git helm-gtags helm-gitignore helm-github-stars helm-descbinds helm-dash helm-css-scss helm-c-yasnippet helm-ag haml-mode gulpjs google-translate google-c-style golden-ratio gitignore-mode github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-commit gist gh-md ggtags flycheck-pos-tip flycheck-package flycheck flx-ido find-file-in-project find-by-pinyin-dired fill-column-indicator fancy-battery expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-vimish-fold evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-matchit evil-jumper evil-indent-textobject evil-iedit-state evil-exchange evil-escape evil-args evil-anzu eshell-prompt-extras esh-help epc engine-mode emoji-cheat-sheet-plus emmet-mode elisp-slime-nav discover-my-major disaster dired-hacks-utils define-word cython-mode ctags-update counsel company-web company-tern company-statistics company-quickhelp company-emoji company-c-headers company-anaconda company coffee-mode cmake-font-lock clj-refactor clean-aindent-mode clang-format cider-eval-sexp-fu cider chinese-pyim buffer-move beacon auto-yasnippet auto-highlight-symbol auto-dictionary anaconda-mode align-cljlet aggressive-indent adaptive-wrap ace-window ace-pinyin ace-link ac-ispell 4clojure evil-leader evil which-key quelpa package-build use-package bind-key s dash spacemacs-theme))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
+ '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
